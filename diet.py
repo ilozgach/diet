@@ -1,7 +1,6 @@
 import collections
 import typing
 
-from py_markdown_table.markdown_table import markdown_table
 
 class Macronutrients():
     pfcc = {
@@ -75,6 +74,18 @@ dinner_21_00 = Meal("ужин 21:00", [("творог 9%", 90), ("мед", 20), 
 # MAIN #############################################################################################
 ####################################################################################################
 
+class MarkdownTable():
+    def __init__(self, data: list[collections.OrderedDict]) -> None:
+        self.data = data
+    
+    def __str__(self) -> str:
+        res = "|" + "|".join(self.data[0].keys()) + "|\n"
+        res += "|-" * len(self.data[0].keys()) + "|\n"
+        for d in self.data:
+            res += "|" + "|".join(str(x) for x in d.values()) + "|\n"
+        return res
+            
+
 if __name__ == "__main__":
     meals = [breakfast_08_00, lunch_12_30, snack_15_00, dinner_19_00, dinner_21_00]
 
@@ -91,26 +102,26 @@ if __name__ == "__main__":
             for item_name, item_weight in meal.content:
                 protein, fat, carbohydrate, calorie = Macronutrients.get_pfcc(item_name, item_weight)
 
-                table_data.append({
+                table_data.append(collections.OrderedDict({
                     "продукт": item_name,
                     "вес": item_weight,
                     "белки": f"{protein:.2f}",
                     "жиры": f"{fat:.2f}",
                     "углеводы": f"{carbohydrate:.2f}",
                     "ккал": f"{calorie:.2f}",
-                })
+                }))
 
             pfcc = meal.get_pfcc()
-            table_data.append({
+            table_data.append(collections.OrderedDict({
                 "продукт": "",
                 "вес": "",
                 "белки": f"{pfcc[0]:.2f} - {pfcc[0] / total_pfcc[0] * 100:.2f}%",
                 "жиры": f"{pfcc[1]:.2f} - {pfcc[1] / total_pfcc[1] * 100:.2f}%",
                 "углеводы": f"{pfcc[2]:.2f} - {pfcc[2] / total_pfcc[2] * 100:.2f}%",
                 "ккал": f"{pfcc[3]:.2f} - {pfcc[3] / total_pfcc[3] * 100:.2f}%",
-            })
+            }))
 
-            markdown = markdown_table(table_data).get_markdown()
+            markdown = str(MarkdownTable(table_data))
             f.write(markdown + "\n")
         
         f.write(f"**выход**\n\n")
@@ -122,5 +133,5 @@ if __name__ == "__main__":
             "ккал": f"{total_pfcc[3]:.2f}",
         }]
 
-        markdown = markdown_table(table_data).get_markdown()
+        markdown = str(MarkdownTable(table_data))
         f.write(markdown + "\n")
